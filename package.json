@@ -26,6 +26,7 @@
     "gulp-if": "^1.2.5",
     "gulp-jshint": "^1.11.0",
     "gulp-load-plugins": "^0.10.0",
+    "gulp-preprocess": "^1.2.0",
     "gulp-sftp": "^0.1.4",
     "gulp-template": "^3.0.0",
     "gulp-watch": "^4.2.4",

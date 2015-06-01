@@ -52,9 +52,16 @@ module.exports = function(gulp) {
 
     gulp.task("build", function() {
         return gulp.src("plugin/**")
-            .pipe(plugins.template({
-                img_srv_url: config.dev.image_server_url
-            }))
+            .pipe(plugins.if(options.env === "dev", plugins.preprocess({
+                context: {
+                    IMAGE_SERVER_URL: config.dev.image_server_url
+                }
+            })))
+            .pipe(plugins.if(options.env === "prod", plugins.preprocess({
+                context: {
+                    IMAGE_SERVER_URL: config.prod.image_server_url
+                }
+            })))
             .pipe(plugins.zip("plugin.zip"))
             .pipe(gulp.dest("dist"));
     });
