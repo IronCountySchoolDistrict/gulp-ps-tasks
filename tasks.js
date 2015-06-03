@@ -67,8 +67,9 @@ module.exports = function(gulp) {
     });
 
     gulp.task("lint", function() {
-        return gulp.src("src/**")
-            .pipe(plugins.jshint())
-            .pipe(plugins.jshint.reporter("default"));
+        return gulp.src("src/**/*.js")
+            .pipe(plugins.debug())
+            .pipe(plugins.eslint())
+            .pipe(plugins.eslint.format());
     });
 };
