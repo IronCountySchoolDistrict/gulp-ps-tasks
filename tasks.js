@@ -5,6 +5,7 @@ module.exports = function(gulp) {
 
     var minimist = require("minimist");
     var del = require("del");
+    var lazypipe = require("lazypipe");
 
     var knownOptions = {
         string: ["env"],
@@ -39,7 +40,7 @@ module.exports = function(gulp) {
     gulp.task("build-no-img", ["build-plugin", "build-src", "zip", "clean"]);
 
     gulp.task("deploy", function() {
-        return gulp.src("src/**")
+        return gulp.src("dist/src/**")
             .pipe(plugins.if(options.env === "dev", plugins.sftp(config.dev.deploy_credentials)))
             .pipe(plugins.if(options.env === "prod", plugins.sftp(config.prod.deploy_credentials)));
     });
@@ -50,26 +51,58 @@ module.exports = function(gulp) {
             .pipe(plugins.sftp(config.test.deploy_credentials));
     });
 
-    gulp.task("build", function() {
-        return gulp.src("plugin/**")
-            .pipe(plugins.if(options.env === "dev", plugins.preprocess({
-                context: {
-                    IMAGE_SERVER_URL: config.dev.image_server_url
-                }
-            })))
-            .pipe(plugins.if(options.env === "prod", plugins.preprocess({
-                context: {
-                    IMAGE_SERVER_URL: config.prod.image_server_url
-                }
-            })))
+    gulp.task("build", ["less", "copy-images"], function() {
+        return gulp.src([
+                "./plugin/**/*",
+                "./src/**/*",
+                "plugin/plugin.xml",
+                "!src/**/*.less",
+                "!src/**/*.{png,gif,jpg,bmp}"
+            ], {
+                base: "./"
+            })
+            .pipe(plugins.debug())
+            .pipe(preprocess())
+            .pipe(gulp.dest("dist"));
+    });
+
+    gulp.task("copy-images", function() {
+        return gulp.src("./src/**/*.{jpg,png,gif,bmp}", {base: "./src"})
+            .pipe(gulp.dest("dist/src"));
+    });
+
+    gulp.task("package", function() {
+        return gulp.src("dist/plugin/**")
             .pipe(plugins.zip("plugin.zip"))
             .pipe(gulp.dest("dist"));
     });
 
+    var preprocess = lazypipe()
+        .pipe(function() {
+            return plugins.if(options.env === "dev", plugins.preprocess({
+                context: {
+                    IMAGE_SERVER_URL: config.dev.image_server_url
+                }
+            }));
+        })
+        .pipe(function() {
+            return plugins.if(options.env === "prod", plugins.preprocess({
+                context: {
+                    IMAGE_SERVER_URL: config.prod.image_server_url
+                }
+            }));
+        });
+
     gulp.task("lint", function() {
         return gulp.src("src/**/*.js")
-            .pipe(plugins.debug())
             .pipe(plugins.eslint())
             .pipe(plugins.eslint.format());
+    });
+
+    gulp.task("less", function() {
+        return gulp.src("src/**/*.less")
+            .pipe(plugins.less())
+            .pipe(preprocess())
+            .pipe(gulp.dest("dist/src"));
     });
 };
