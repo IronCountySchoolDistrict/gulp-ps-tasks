@@ -81,14 +81,16 @@ module.exports = function(gulp) {
         .pipe(function() {
             return plugins.if(options.env === "dev", plugins.preprocess({
                 context: {
-                    IMAGE_SERVER_URL: config.dev.image_server_url
+                    IMAGE_SERVER_URL: config.dev.image_server_url,
+                    SAMS_URL: config.dev.sams_url
                 }
             }));
         })
         .pipe(function() {
             return plugins.if(options.env === "prod", plugins.preprocess({
                 context: {
-                    IMAGE_SERVER_URL: config.prod.image_server_url
+                    IMAGE_SERVER_URL: config.prod.image_server_url,
+                    SAMS_URL: config.prod.sams_url
                 }
             }));
         });
