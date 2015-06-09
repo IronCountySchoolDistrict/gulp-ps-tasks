@@ -34,6 +34,7 @@
     "gulp-watch": "^4.2.4",
     "gulp-zip": "^3.0.2",
     "lazypipe": "^0.2.3",
+    "minimist": "^1.1.1",
     "mocha": "^2.2.5",
     "mocha-casperjs": "^0.5.3",
     "phantomjs": "^1.9.16"
