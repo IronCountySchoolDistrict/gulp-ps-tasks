@@ -51,13 +51,14 @@ module.exports = function(gulp) {
             .pipe(plugins.sftp(config.test.deploy_credentials));
     });
 
-    gulp.task("build", ["less", "copy-images"], function() {
+    gulp.task("build", ["less", "build-static"], function() {
         return gulp.src([
                 "./plugin/**/*",
                 "./src/**/*",
                 "plugin/plugin.xml",
                 "!src/**/*.less",
-                "!src/**/*.{png,gif,jpg,bmp}"
+                "!src/**/*.{png,gif,jpg,bmp,swf}",
+                "!src/ext/**/*"
             ], {
                 base: "./"
             })
@@ -66,8 +67,11 @@ module.exports = function(gulp) {
             .pipe(gulp.dest("dist"));
     });
 
-    gulp.task("copy-images", function() {
-        return gulp.src("./src/**/*.{jpg,png,gif,bmp}", {base: "./src"})
+    gulp.task("build-static", function() {
+        return gulp.src([
+                "./src/**/*.{jpg,png,gif,bmp,swf}",
+                "./src/ext/**"
+            ] , {base: "./src"})
             .pipe(gulp.dest("dist/src"));
     });
 
