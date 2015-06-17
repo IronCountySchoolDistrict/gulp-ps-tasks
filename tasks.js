@@ -42,6 +42,7 @@ module.exports = function(gulp) {
     gulp.task("deploy", function() {
         return gulp.src("dist/src/**")
             .pipe(plugins.if(options.env === "dev", plugins.sftp(config.dev.deploy_credentials)))
+            .pipe(plugins.if(options.env === "dev8.3", plugins.sftp(config["dev8.3"].deploy_credentials)))
             .pipe(plugins.if(options.env === "prod", plugins.sftp(config.prod.deploy_credentials)));
     });
 
@@ -87,6 +88,14 @@ module.exports = function(gulp) {
                 context: {
                     IMAGE_SERVER_URL: config.dev.image_server_url,
                     SAMS_URL: config.dev.sams_url
+                }
+            }));
+        })
+        .pipe(function() {
+            return plugins.if(options.env === "dev8.3", plugins.preprocess({
+                context: {
+                    IMAGE_SERVER_URL: config["dev8.3"].image_server_url,
+                    SAMS_URL: config["dev8.3"].sams_url
                 }
             }));
         })
