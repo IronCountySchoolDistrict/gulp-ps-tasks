@@ -10,7 +10,7 @@ module.exports = function(gulp) {
     var knownOptions = {
         string: ["env"],
         default: {
-            env: process.env.NODE_ENV || "dev"
+            env: process.env.NODE_ENV || "dev8.3"
         }
     };
 
@@ -41,25 +41,24 @@ module.exports = function(gulp) {
 
     gulp.task("deploy", function() {
         return gulp.src("dist/src/**")
-            .pipe(plugins.if(options.env === "dev", plugins.sftp(config.dev.deploy_credentials)))
-            .pipe(plugins.if(options.env === "dev8.3", plugins.sftp(config["dev8.3"].deploy_credentials)))
-            .pipe(plugins.if(options.env === "prod", plugins.sftp(config.prod.deploy_credentials)));
+            .pipe(deploy());
     });
 
     gulp.task("watch-deploy", function() {
         return gulp.src("src/**")
             .pipe(plugins.watch("src/**"))
-            .pipe(plugins.sftp(config.test.deploy_credentials));
+            .pipe(preprocess())
+            .pipe(deploy());
     });
 
-    gulp.task("build", ["less", "build-static"], function() {
+    gulp.task("preprocess", ["less", "build-static"], function() {
         return gulp.src([
                 "./plugin/**/*",
                 "./src/**/*",
                 "plugin/plugin.xml",
                 "!src/**/*.less",
                 "!src/**/*.{png,gif,jpg,bmp,swf}",
-                "!src/ext/**/*"
+                "!src/**/ext/**"
             ], {
                 base: "./"
             })
@@ -71,7 +70,7 @@ module.exports = function(gulp) {
     gulp.task("build-static", function() {
         return gulp.src([
                 "./src/**/*.{jpg,png,gif,bmp,swf}",
-                "./src/ext/**"
+                "./src/**/ext/**"
             ] , {base: "./src"})
             .pipe(gulp.dest("dist/src"));
     });
@@ -82,28 +81,19 @@ module.exports = function(gulp) {
             .pipe(gulp.dest("dist"));
     });
 
+    var deploy = lazypipe()
+        .pipe(function() {
+            var env = options.env;
+            return plugins.if(config.hasOwnProperty(env), plugins.sftp(config[env].deploy_credentials))
+        });
+
     var preprocess = lazypipe()
         .pipe(function() {
-            return plugins.if(options.env === "dev", plugins.preprocess({
+            var env = options.env;
+            return plugins.if(config.hasOwnProperty(env), plugins.preprocess({
                 context: {
-                    IMAGE_SERVER_URL: config.dev.image_server_url,
-                    SAMS_URL: config.dev.sams_url
-                }
-            }));
-        })
-        .pipe(function() {
-            return plugins.if(options.env === "dev8.3", plugins.preprocess({
-                context: {
-                    IMAGE_SERVER_URL: config["dev8.3"].image_server_url,
-                    SAMS_URL: config["dev8.3"].sams_url
-                }
-            }));
-        })
-        .pipe(function() {
-            return plugins.if(options.env === "prod", plugins.preprocess({
-                context: {
-                    IMAGE_SERVER_URL: config.prod.image_server_url,
-                    SAMS_URL: config.prod.sams_url
+                    IMAGE_SERVER_URL: config[env].image_server_url,
+                    SAMS_URL: config[env].sams_url
                 }
             }));
         });
@@ -115,7 +105,10 @@ module.exports = function(gulp) {
     });
 
     gulp.task("less", function() {
-        return gulp.src("src/**/*.less")
+        return gulp.src([
+                "src/**/*.less",
+                "!src/**/ext/**"
+            ])
             .pipe(plugins.less())
             .pipe(preprocess())
             .pipe(gulp.dest("dist/src"));
