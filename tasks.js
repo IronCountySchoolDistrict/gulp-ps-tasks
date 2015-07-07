@@ -51,18 +51,17 @@ module.exports = function(gulp) {
             .pipe(deploy());
     });
 
-    gulp.task("preprocess", ["less", "build-static"], function() {
+    gulp.task("build", ["less", "build-static", "babel"], function() {
         return gulp.src([
                 "./plugin/**/*",
                 "./src/**/*",
                 "plugin/plugin.xml",
                 "!src/**/*.less",
-                "!src/**/*.{png,gif,jpg,bmp,swf}",
+                "!src/**/*.{png,gif,jpg,bmp,swf,js}",
                 "!src/**/ext/**"
             ], {
                 base: "./"
             })
-            .pipe(plugins.debug())
             .pipe(preprocess())
             .pipe(gulp.dest("dist"));
     });
@@ -71,7 +70,9 @@ module.exports = function(gulp) {
         return gulp.src([
                 "./src/**/*.{jpg,png,gif,bmp,swf}",
                 "./src/**/ext/**"
-            ] , {base: "./src"})
+            ], {
+                base: "./src"
+            })
             .pipe(gulp.dest("dist/src"));
     });
 
@@ -80,6 +81,19 @@ module.exports = function(gulp) {
             .pipe(plugins.zip("plugin.zip"))
             .pipe(gulp.dest("dist"));
     });
+
+    gulp.task("babel", function() {
+        return gulp.src([
+                "./src/**/*.js",
+                "!src/**/ext/**"
+            ], {
+                base: "./"
+            })
+            .pipe(plugins.debug())
+            .pipe(preprocess())
+            .pipe(plugins.babel())
+            .pipe(gulp.dest("dist"));
+    })
 
     var deploy = lazypipe()
         .pipe(function() {
@@ -92,7 +106,7 @@ module.exports = function(gulp) {
             var env = options.env;
             return plugins.if(config.hasOwnProperty(env), plugins.preprocess({
                 context: {
-                    IMAGE_SERVER_URL: config[env].image_server_url,
+                    IMAGE_SERVER_URL: config[env].image_server_url + "/" + env,
                     SAMS_URL: config[env].sams_url
                 }
             }));
