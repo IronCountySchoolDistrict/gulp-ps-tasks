@@ -1,0 +1,12 @@
+{
+  "": {
+    "image_server_url": "",
+    "sams_url": "",
+    "deploy_credentials": {
+      "host": "",
+      "user": "",
+      "pass": "",
+      "remotePath": ""
+    }
+  }
+}
