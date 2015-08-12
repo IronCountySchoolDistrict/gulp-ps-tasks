@@ -41,6 +41,7 @@ module.exports = function(gulp) {
 
     gulp.task("deploy", function() {
         return gulp.src("dist/src/**")
+            .pipe(plugins.debug())
             .pipe(deploy());
     });
 
@@ -55,13 +56,16 @@ module.exports = function(gulp) {
         return gulp.src([
                 "./plugin/**/*",
                 "./src/**/*",
+                "./queries_root/**/*",
                 "plugin/plugin.xml",
                 "!src/**/*.less",
                 "!src/**/*.{png,gif,jpg,bmp,swf,js}",
-                "!src/**/ext/**"
+                "!src/**/ext/**",
+                "!src/less{,/**}"
             ], {
                 base: "./"
             })
+            .pipe(plugins.debug())
             .pipe(preprocess())
             .pipe(gulp.dest("dist"));
     });
@@ -106,8 +110,9 @@ module.exports = function(gulp) {
             var env = options.env;
             return plugins.if(config.hasOwnProperty(env), plugins.preprocess({
                 context: {
-                    IMAGE_SERVER_URL: config[env].image_server_url + "/" + env,
-                    SAMS_URL: config[env].sams_url
+                    IMAGE_SERVER_URL: config[env].image_server_url,
+                    SAMS_URL: config[env].sams_url,
+                    API_URL: config[env].api_url
                 }
             }));
         });
@@ -121,7 +126,8 @@ module.exports = function(gulp) {
     gulp.task("less", function() {
         return gulp.src([
                 "src/**/*.less",
-                "!src/**/ext/**"
+                "!src/**/ext/**",
+                "!src/**/less/**"
             ])
             .pipe(plugins.less())
             .pipe(preprocess())

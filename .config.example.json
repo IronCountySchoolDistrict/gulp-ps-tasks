@@ -2,6 +2,7 @@
   "": {
     "image_server_url": "",
     "sams_url": "",
+    "api_url": "",
     "deploy_credentials": {
       "host": "",
       "user": "",
