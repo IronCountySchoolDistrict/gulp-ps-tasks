@@ -97,7 +97,7 @@ module.exports = function(gulp) {
             .pipe(preprocess())
             .pipe(plugins.babel())
             .pipe(gulp.dest("dist"));
-    })
+    });
 
     var deploy = lazypipe()
         .pipe(function() {
