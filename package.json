@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Gulp tasks useful for PowerSchool Customizations development",
   "main": "",
-  "scripts": {
-    "test": ""
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/IronCountySchoolDistrict/gulp-ps-tasks.git"
@@ -17,29 +14,23 @@
   },
   "homepage": "https://github.com/IronCountySchoolDistrict/gulp-ps-tasks#readme",
   "devDependencies": {
-    "babel": "^5.6.5",
-    "casper-chai": "^0.2.1",
-    "casperjs": "^1.1.0-beta3",
-    "chai": "^2.3.0",
-    "del": "^1.2.0",
-    "eslint": "^0.22.1",
+    "babel": "^6.3.26",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.4.5",
+    "del": "^2.2.0",
+    "eslint": "^1.10.3",
     "gulp": "^3.8.11",
-    "gulp-babel": "^5.1.0",
+    "gulp-babel": "^6.1.2",
     "gulp-debug": "^2.0.1",
-    "gulp-eslint": "^0.12.0",
-    "gulp-if": "^1.2.5",
+    "gulp-eslint": "^1.1.1",
+    "gulp-if": "^2.0.0",
     "gulp-less": "^3.0.3",
-    "gulp-load-plugins": "^0.10.0",
-    "gulp-preprocess": "^1.2.0",
+    "gulp-load-plugins": "^1.2.0",
+    "gulp-preprocess": "^2.0.0",
     "gulp-sftp": "^0.1.4",
     "gulp-template": "^3.0.0",
     "gulp-watch": "^4.2.4",
     "gulp-zip": "^3.0.2",
-    "lazypipe": "^0.2.3",
-    "minimist": "^1.1.1",
-    "mocha": "^2.2.5",
-    "mocha-casperjs": "^0.5.3",
-    "oracledb": "^0.6.0",
-    "phantomjs": "^1.9.16"
+    "lazypipe": "^1.0.1",
+    "minimist": "^1.1.1"
   }
 }
