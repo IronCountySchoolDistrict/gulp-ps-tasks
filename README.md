@@ -9,7 +9,7 @@
 
 ## Configuration
 ### config.json
-NOTE: You only to do configure this project if you want to deploy your project to an image server.
+NOTE: You only have to configure this project if you want to deploy your project to an image server.
 
 Make a copy of the `.config.example.json` file named `config.json`, filling in your own server's sftp credentials.
 
@@ -17,12 +17,12 @@ Make a copy of the `.config.example.json` file named `config.json`, filling in y
 {
   "dev8.3": {
     "image_server_url": "https://images.example.com",
-    "sams_url": "https://sams.example.com",
+    "sams_url": "https://sams.example.com", // ICSD-specific, oprobably not needed
     "deploy_credentials": {
       "host": "127.0.0.1",
       "user": "user",
       "pass": "password",
-      "remotePath": "/usr/share/nginx/psimages"
+      "remotePath": "/path/to/assets/folder"
     }
   }
 }
