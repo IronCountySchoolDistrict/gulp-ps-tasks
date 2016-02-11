@@ -15,17 +15,35 @@ Make a copy of the `.config.example.json` file named `config.json`, filling in y
 
 ```
 {
-  "dev8.3": {
+  "image_server_name": {
     "image_server_url": "https://images.example.com",
-    "sams_url": "https://sams.example.com", // ICSD-specific, oprobably not needed
+    "sams_url": "https://sams.example.com",
+    "api_url": "https://api.example.com",
     "deploy_credentials": {
-      "host": "127.0.0.1",
+      "host": "sftp_host",
       "user": "user",
       "pass": "password",
       "remotePath": "/path/to/assets/folder"
     }
-  }
+  },
+
+  "image_server_name2": {
+    "image_server_url": "https://images.example.com",
+    "sams_url": "https://sams.example.com",
+    "api_url": "https://api.example.com",
+    "deploy_credentials": {
+      "host": "sftp_host",
+      "user": "user",
+      "pass": "password",
+      "remotePath": "/path/to/assets/folder"
+    }
+  },
+  
+  // Optional: If no --env options is passed to the deploy task, 
+  // provide the "image_server_name" that should be used as a default
+  "default_deploy_target": "image_server_name"
 }
+
 ```
 
 ## Task Usage

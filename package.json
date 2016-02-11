@@ -1,13 +1,16 @@
 {
   "name": "gulp-ps-tasks",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Gulp tasks useful for PowerSchool Customizations development",
-  "main": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "gulp build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/IronCountySchoolDistrict/gulp-ps-tasks.git"
   },
-  "author": "IronCountySchoolDistrict",
+  "author": "Nathan Jones <nathan.jones@ironmail.org>",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/IronCountySchoolDistrict/gulp-ps-tasks/issues"
@@ -16,6 +19,7 @@
   "devDependencies": {
     "babel": "^6.3.26",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.4.5",
+    "babel-register": "^6.4.3",
     "del": "^2.2.0",
     "eslint": "^1.10.3",
     "gulp": "^3.8.11",
@@ -31,6 +35,7 @@
     "gulp-watch": "^4.2.4",
     "gulp-zip": "^3.0.2",
     "lazypipe": "^1.0.1",
-    "minimist": "^1.1.1"
+    "minimist": "^1.1.1",
+    "run-sequence": "^1.1.5"
   }
 }
