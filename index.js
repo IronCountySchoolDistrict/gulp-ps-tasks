@@ -5,29 +5,72 @@ import lazypipe from 'lazypipe';
 import normalize from 'normalize-path';
 import { readFileSync } from 'fs';
 
-const psTasksRoot = process.env['PSTASKS_ROOT'];
-const normalizedRoot = normalize(psTasksRoot);
-const config = JSON.parse(readFileSync(`${normalizedRoot}/config.json`).toString());
-console.log('config == ', config);
+const knownOptions = {
+    string: ['env', 'config']
+};
 
-export default function (gulp) {
-    const plugins = gulpLoadPlugins();
-    const knownOptions = {
-        string: ["env"],
-        default: {
-            env: config.default_deploy_target
+const options = minimist(process.argv.slice(2), knownOptions);
+
+
+/**
+ * Returns a config object by checking three sources in this order:
+ *  1. If there was a --config option passed in the cli options, use the 
+ *  config.json file provided there.
+ *  2. If 1 failed, and there is a config.json file in the project folder, use that config.json
+ *  3. If 1 and 2 failed, and there is an environment variable PSTASKS_ROOT, use the config.json in that directory.
+ *  4. If the first 3 failed, throw an error.
+ *  
+ * @return {object|null}
+ */
+function loadConfig() {
+    if (options.config) {
+        console.log(`Using config.json found at ${options.config}`);
+        const normalizedPath = normalize(options.config);
+        const configStr = readFileSync(`${normalizedPath}/config.json`).toString();
+        return JSON.parse(configStr);
+    }
+    try {
+        const configStr = readFileSync('./config.json').toString();
+        console.log('Using config.json found in project folder');
+        return JSON.parse(configStr);
+    } catch (e) {
+        const psTasksRoot = process.env['PSTASKS_ROOT'];
+        if (!psTasksRoot) {
+            throw new Error('Unable to locate config. PSTASKS_ROOT env var not set.');
+        } else {
+            const normalizedPath = normalize(psTasksRoot);
+            try {
+                const configStr = readFileSync(`${psTasksRoot}/config.json`).toString();
+                console.log(`using config.json in PSTASKS_ROOT: ${psTasksRoot}`);
+                return JSON.parse(configStr);
+            } catch (e) {
+                console.log(`error reading config.json found at ${psTasksRoot}`);
+            }
         }
-    };
+
+    }
+    console.log('Could not load config.json -- all three loading methods failed');
+    return null;
+}
+
+/**
+ * registers the following gulp tasks to the project-level (local) gulp
+ * @param  {object} gulp default export
+ * @param  {string} __dirname of the project folder that gulp command was executed from
+ * @return {undefined} 
+ */
+export default function (gulp, projectPath) {
+    const config = loadConfig();
+    console.log('config == ', config);
+    if (!options.env) {
+        options.env = config.default_deploy_target;
+    }
+
+    const plugins = gulpLoadPlugins();
 
     if (!config.default_deploy_target && !knownOptions.env) {
         throw new Error('No deploy target provided in cli options or the default_deploy_target config option');
     }
-
-    if (!psTasksRoot) {
-        throw new Error('Unable to locate config. PSTASKS_ROOT env var not set.');
-    }
-
-    const options = minimist(process.argv.slice(2), knownOptions);
 
     // No image server
     gulp.task("build-plugin", () =>
@@ -123,7 +166,6 @@ export default function (gulp) {
             const env = options.env;
             return plugins.if(config.hasOwnProperty(env), plugins.preprocess({
                 context: {
-                    IMAGE_SERVER_URL: config[env].image_server_url,
                     SAMS_URL: config[env].sams_url,
                     API_URL: config[env].api_url
                 }
