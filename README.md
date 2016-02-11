@@ -18,7 +18,6 @@ Make a copy of the `.config.example.json` file named `config.json`, filling in y
 ```
 {
   "image_server_name": {
-    "image_server_url": "https://images.example.com",
     "sams_url": "https://sams.example.com",
     "api_url": "https://api.example.com",
     "deploy_credentials": {
@@ -30,7 +29,6 @@ Make a copy of the `.config.example.json` file named `config.json`, filling in y
   },
 
   "image_server_name2": {
-    "image_server_url": "https://images.example.com",
     "sams_url": "https://sams.example.com",
     "api_url": "https://api.example.com",
     "deploy_credentials": {
