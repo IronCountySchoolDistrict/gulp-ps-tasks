@@ -8,6 +8,8 @@
 - [Npm](https://www.npmjs.com/)
 
 ## Configuration
+### PSTASKS_ROOT
+In order for this project to know where your `config.json` file is, you'll need to set an environment variable called `PSTASKS_ROOT`. Its value should be the directory in which your `config.json` resides.
 ### config.json
 NOTE: You only have to configure this project if you want to deploy your project to an image server.
 
