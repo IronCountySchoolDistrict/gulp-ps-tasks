@@ -3,18 +3,27 @@
 
 
 ## Installation
+```
+npm install -g babel babel-cli babel-register
+npm install gulp-ps-tasks
+```
 ### Requirements
-- [Gulp](https://github.com/gulpjs/gulp/blob/master/docs/getting-started.md/)
-- [Npm](https://www.npmjs.com/)
 
 ## Configuration
-### PSTASKS_ROOT
-In order for this project to know where your `config.json` file is, you'll need to set an environment variable called `PSTASKS_ROOT`. Its value should be the directory in which your `config.json` resides.
 ### config.json
-NOTE: You only have to configure this project if you want to deploy your project to an image server.
+A `config.json` file is required for the following information:
+* Image server sftp credentials
+* Any URLs that should be dynamically inserted into your project's code
+The `config.json` file location can be specified one of three ways. As soon as a config file is found, the search for a config file stops and the first config file found is used. Note that the config path should only include the path to your `config.json` file -- it should not include the `config.json` filename itself. Trailing slashes don't matter, they will be removed if they're included.
 
-Make a copy of the `.config.example.json` file named `config.json`, filling in your own server's sftp credentials.
+1. Command Line Option: add a `--config {configPath}` option to your `gulp {taskname}` command. Example: `gulp build --config /home/nathan/projects/plugins`.
+2. `config.json` is placed in your project folder.
+3. Set an environment variable, `PSTASKS_ROOT`, to the directory path of your `config.json` file.
 
+If you have a large number of plugins, I recommend using method 3 because it allows you to create and maintain a single `config.json` file that can be used across all of your plugins. However, if you want it to just work, use method 2.
+
+### config.example.json
+The following config example should be used as a starting point for your own `config.json` file.
 ```
 {
   "image_server_name": {
@@ -43,8 +52,10 @@ Make a copy of the `.config.example.json` file named `config.json`, filling in y
   // provide the "image_server_name" that should be used as a default
   "default_deploy_target": "image_server_name"
 }
-
 ```
+
+### Local gulpfile
+In order to use the gulp tasks included here with your own project, make a copy of the `local.gulpfile.babel.js` file and rename it to `gulpfile.babel.js`.
 
 ## Task Usage
 Run a task using `gulp {taskname}`
