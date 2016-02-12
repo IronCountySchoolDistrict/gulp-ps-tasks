@@ -1,3 +1,4 @@
+console.log('hi');
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import runSequence from 'run-sequence';

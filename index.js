@@ -61,7 +61,6 @@ function loadConfig() {
  */
 export default function (gulp, projectPath) {
     const config = loadConfig();
-    console.log('config == ', config);
     if (!options.env) {
         options.env = config.default_deploy_target;
     }
@@ -119,7 +118,7 @@ export default function (gulp, projectPath) {
             "!src/**/ext/**",
             "!src/less{,/**}"
         ], {
-            base: "./"
+            base: "./src"
         })
         .pipe(plugins.debug())
         .pipe(preprocess())
@@ -147,7 +146,7 @@ export default function (gulp, projectPath) {
             "./src/**/*.js",
             "!src/**/ext/**"
         ], {
-            base: "./"
+            base: "./src"
         })
         .pipe(plugins.debug())
         .pipe(preprocess())
