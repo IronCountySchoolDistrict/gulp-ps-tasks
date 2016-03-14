@@ -3,10 +3,13 @@
 
 
 ## Installation
+1. Install dependencies:
 ```
-npm install -g babel babel-cli babel-register
-npm install gulp-ps-tasks
+npm install -g babel babel-cli babel-register babel-plugin-transform-es2015-modules-commonjs
+npm install --save-dev gulp-ps-tasks
 ```
+2. Copy `.babelrc` and `local.gulpfile.babel.js` to the root of your project folder.
+3. Rename the local copy of `local.gulpfile.babel.js` to `gulpfile.babel.js`.
 ### Requirements
 
 ## Configuration
