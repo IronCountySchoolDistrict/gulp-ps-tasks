@@ -11,8 +11,6 @@ npm install --save-dev gulp-ps-tasks
 #### 2. Copy `.babelrc` and `local.gulpfile.babel.js` to the root of your project folder.
 #### 3. Rename the local copy of `local.gulpfile.babel.js` to `gulpfile.babel.js`.
 
-### Requirements
-
 ## Configuration
 ### config.json
 A `config.json` file is required for the following information:
