@@ -110,7 +110,7 @@ export default function(gulp, projectPath) {
     .pipe(deploy())
   );
 
-  gulp.task('build', ['less', 'build-static', 'babel'], () =>
+  gulp.task('build', ['build:less', 'build:static', 'build:babel'], () =>
     gulp.src([
       './plugin/**/*',
       './src/**/*',
@@ -129,7 +129,7 @@ export default function(gulp, projectPath) {
     .pipe(gulp.dest('dist'))
   );
 
-  gulp.task('build-static', () =>
+  gulp.task('build:static', () =>
     gulp.src([
       './src/**/*.{jpg,png,gif,bmp,swf}',
       './src/**/ext/**',
@@ -142,13 +142,13 @@ export default function(gulp, projectPath) {
     .pipe(gulp.dest('dist/'))
   );
 
-  gulp.task('package', () =>
+  gulp.task('build:package', () =>
     gulp.src('dist/plugin/**')
     .pipe(plugins.zip('plugin.zip'))
     .pipe(gulp.dest('dist'))
   );
 
-  gulp.task('babel', () =>
+  gulp.task('build:babel', () =>
     gulp.src([
       './src/**/*.js',
       '!src/**/ext/**'
@@ -183,13 +183,13 @@ export default function(gulp, projectPath) {
       }));
     });
 
-  gulp.task('lint', () =>
+  gulp.task('build:lint', () =>
     gulp.src('src/**/*.js')
     .pipe(plugins.eslint())
     .pipe(plugins.eslint.format())
   );
 
-  gulp.task('less', () =>
+  gulp.task('build:less', () =>
     gulp.src([
       'src/**/*.less',
       '!src/**/ext/**',
