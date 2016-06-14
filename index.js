@@ -91,7 +91,7 @@ export default function(gulp, projectPath) {
     .pipe(gulp.dest('dist'))
   );
 
-  gulp.task('clean', ['zip'], () => {
+  gulp.task('clean', () => {
     del(['dist/*', '!dist/*.zip'])
   });
 
@@ -142,7 +142,7 @@ export default function(gulp, projectPath) {
     .pipe(gulp.dest('dist/'))
   );
 
-  gulp.task('build:package', () =>
+  gulp.task('package', () =>
     gulp.src('dist/plugin/**')
     .pipe(plugins.zip('plugin.zip'))
     .pipe(gulp.dest('dist'))
