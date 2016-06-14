@@ -119,7 +119,8 @@ export default function(gulp, projectPath) {
       '!src/**/*.less',
       '!src/**/*.{png,gif,jpg,bmp,swf,js}',
       '!src/**/ext/**',
-      '!src/less{,/**}'
+      '!src/less{,/**}',
+      '!plugin/web_root/admin/**/*.js'
     ], {
       base: './'
     })
@@ -131,7 +132,10 @@ export default function(gulp, projectPath) {
   gulp.task('build-static', () =>
     gulp.src([
       './src/**/*.{jpg,png,gif,bmp,swf}',
-      './src/**/ext/**'
+      './src/**/ext/**',
+
+      //treat all js files within /admin as a static resource
+      './plugin/web_root/admin/**/*.js'
     ], {
       base: './'
     })
