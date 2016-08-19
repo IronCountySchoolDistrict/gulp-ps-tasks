@@ -175,12 +175,19 @@ export default function(gulp, projectPath) {
   const preprocess = lazypipe()
     .pipe(() => {
       const env = options.env;
-      return plugins.if(config.hasOwnProperty(env), plugins.preprocess({
-        context: {
-          SAMS_URL: config[env].sams_url,
-          API_URL: config[env].api_url
-        }
-      }));
+      const context = {
+        context: {}
+      };
+      if (config[env].sams_url) {
+        context.context.SAMS_URL = config[env].sams_url;
+      }
+      if (config[env].api_url) {
+        context.context.API_URL = config[env].api_url;
+      }
+      if (config[env].ps_url) {
+        context.context.PS_URL = config[env].ps_url;
+      }
+      return plugins.if(config.hasOwnProperty(env), plugins.preprocess(context));
     });
 
   gulp.task('build:lint', () =>

@@ -2,6 +2,7 @@
   "image_server_name": {
     "sams_url": "",
     "api_url": "",
+    "ps_url": "",
     "deploy_credentials": {
       "host": "",
       "user": "",
@@ -13,6 +14,7 @@
   "image_server_name2": {
     "sams_url": "https://sams.example.com",
     "api_url": "https://api.example.com",
+    "ps_url": "https://ps.example.com",
     "deploy_credentials": {
       "host": "sftp_host",
       "user": "user",
@@ -20,8 +22,8 @@
       "remotePath": "/path/to/assets/folder"
     }
   },
-  
-  // Optional: If no --env options is passed to the deploy task, 
-  // provide the "image_server_name" that should be used as a default 
+
+  // Optional: If no --env options is passed to the deploy task,
+  // provide the "image_server_name" that should be used as a default
   "default_deploy_target": "image_server_name"
 }
