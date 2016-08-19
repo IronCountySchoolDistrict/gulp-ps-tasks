@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/IronCountySchoolDistrict/gulp-ps-tasks#readme",
   "dependencies": {
-    "babel": "^6.3.26",
+    "babel-cli": "^6.11.4",
     "del": "^2.2.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^6.1.2",
