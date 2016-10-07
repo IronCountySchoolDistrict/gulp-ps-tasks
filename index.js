@@ -110,7 +110,7 @@ export default function(gulp, projectPath) {
     .pipe(deploy())
   );
 
-  gulp.task('build', ['build:less', 'build:static', 'build:babel'], () =>
+  gulp.task('build', ['build:less', 'build:sass', 'build:static', 'build:babel'], () =>
     gulp.src([
       './plugin/**/*',
       './src/**/*',
