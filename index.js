@@ -99,7 +99,6 @@ export default function(gulp, projectPath) {
 
   gulp.task('deploy', () =>
     gulp.src('dist/src/**')
-    .pipe(plugins.debug())
     .pipe(deploy())
   );
 
@@ -124,7 +123,6 @@ export default function(gulp, projectPath) {
     ], {
       base: './'
     })
-    .pipe(plugins.debug())
     .pipe(preprocess())
     .pipe(gulp.dest('dist'))
   );
@@ -155,7 +153,6 @@ export default function(gulp, projectPath) {
     ], {
       base: './'
     })
-    .pipe(plugins.debug())
     .pipe(preprocess())
     .pipe(plugins.babel({
       plugins: [
