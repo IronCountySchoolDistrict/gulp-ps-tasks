@@ -3,6 +3,7 @@ import minimist from 'minimist';
 import del from 'del';
 import lazypipe from 'lazypipe';
 import normalize from 'normalize-path';
+import {basename} from 'path';
 import {
   readFileSync
 } from 'fs';
@@ -116,9 +117,11 @@ export default function(gulp, projectPath) {
       './queries_root/**/*',
       'plugin/plugin.xml',
       '!src/**/*.less',
+      '!src/**/.*scss',
       '!src/**/*.{png,gif,jpg,bmp,swf,js}',
       '!src/**/ext/**',
-      '!src/less{,/**}',
+      '!src/**/less{,/**}',
+      '!src/**/sass{,/**}',
       '!plugin/web_root/admin/**/*.js'
     ], {
       base: './'
@@ -202,5 +205,18 @@ export default function(gulp, projectPath) {
     .pipe(plugins.less())
     .pipe(preprocess())
     .pipe(gulp.dest('dist/src'))
+  );
+
+  gulp.task('build:sass', () =>
+    gulp.src([
+      'src/scripts/*',
+      '!src/**/ext/**'
+    ])
+    .pipe(plugins.flatmap((stream, dir) =>
+      gulp.src(dir.path + '/**/*.scss')
+        .pipe(plugins.sass().on('error', plugins.sass.logError))
+        .pipe(plugins.concatCss('css/bundle.css'))
+        .pipe(gulp.dest('dist/src/scripts/' + basename(dir.path)))
+    ))
   );
 }
