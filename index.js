@@ -110,6 +110,12 @@ export default function(gulp, projectPath) {
     .pipe(deploy())
   );
 
+  gulp.task('package', () =>
+    gulp.src('dist/plugin/**')
+    .pipe(plugins.zip('plugin.zip'))
+    .pipe(gulp.dest('dist'))
+  );
+
   gulp.task('build', ['build:less', 'build:sass', 'build:static', 'build:babel'], () =>
     gulp.src([
       './plugin/**/*',
@@ -122,7 +128,8 @@ export default function(gulp, projectPath) {
       '!src/**/ext/**',
       '!src/**/less{,/**}',
       '!src/**/sass{,/**}',
-      '!plugin/web_root/admin/**/*.js'
+      '!plugin/web_root/admin/**/*.js',
+      '!plugin/WEB_ROOT/admin/**/*.js'
     ], {
       base: './'
     })
@@ -143,11 +150,6 @@ export default function(gulp, projectPath) {
     .pipe(gulp.dest('dist/'))
   );
 
-  gulp.task('package', () =>
-    gulp.src('dist/plugin/**')
-    .pipe(plugins.zip('plugin.zip'))
-    .pipe(gulp.dest('dist'))
-  );
 
   gulp.task('build:babel', () =>
     gulp.src([
