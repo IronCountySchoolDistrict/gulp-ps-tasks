@@ -1,12 +1,13 @@
-import gulpLoadPlugins from 'gulp-load-plugins';
-import minimist from 'minimist';
-import del from 'del';
-import lazypipe from 'lazypipe';
-import normalize from 'normalize-path';
-import {basename} from 'path';
+import gulpLoadPlugins from 'gulp-load-plugins'
+import minimist from 'minimist'
+import del from 'del'
+import lazypipe from 'lazypipe'
+import normalize from 'normalize-path'
+import webpackStream from 'webpack-stream'
+import {basename} from 'path'
 import {
   readFileSync
-} from 'fs';
+} from 'fs'
 
 const knownOptions = {
   string: ['env', 'config']
@@ -192,15 +193,25 @@ export default function(gulp, projectPath) {
     .src('dist/src/**')
     .pipe(deploy())
   
+  export const buildWebpack = () => gulp
+    .pipe(webpackStream( require('./webpack.config.babel.js')))
+    .dist(gulp.dest('dist/'))
+  
   // Orchestrators
   export const createPkgNoImage = done => {
     return gulp.series(
-      'buildNoImage', 'buildPackage'
+      gulp.parallel(
+        'buildNoImage', 'buildWebpack'
+      ),
+      'buildPackage'
     )
   }
   export const createPkgWithImage = done => {
     return gulp.series(
-      'buildWithImage', 'buildPackage', 'buildDeploy'
+      gulp.parallel(
+        'buildWithImage', 'buildWebpack' 
+      ),
+      'buildDeploy', 'buildPackage' 
     )
   }
 }
