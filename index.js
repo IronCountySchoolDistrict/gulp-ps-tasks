@@ -1,20 +1,22 @@
+import gulp from 'gulp'
 import gulpLoadPlugins from 'gulp-load-plugins'
 import minimist from 'minimist'
 import del from 'del'
 import lazypipe from 'lazypipe'
 import normalize from 'normalize-path'
 import webpackStream from 'webpack-stream'
-import {basename} from 'path'
+import pkgInfo from 'pkginfo'
 import {
   readFileSync
 } from 'fs'
 
+pkgInfo(module)
+
 const knownOptions = {
   string: ['env', 'config']
-};
+}
 
-const options = minimist(process.argv.slice(2), knownOptions);
-
+const options = minimist(process.argv.slice(2), knownOptions)
 
 /**
  * Returns a config object by checking three sources in this order:
@@ -26,192 +28,184 @@ const options = minimist(process.argv.slice(2), knownOptions);
  *
  * @return {object|null}
  */
-function loadConfig() {
+function loadConfig () {
   if (options.config) {
-    console.log(`Using config.json found at ${options.config}`);
-    const normalizedPath = normalize(options.config);
-    const configStr = readFileSync(`${normalizedPath}/config.json`).toString();
-    return JSON.parse(configStr);
+    console.log(`Using config.json found at ${options.config}`)
+    const normalizedPath = normalize(options.config)
+    const configStr = readFileSync(`${normalizedPath}/config.json`).toString()
+    return JSON.parse(configStr)
   }
   try {
-    const configStr = readFileSync('./config.json').toString();
-    console.log('Using config.json found in project folder');
-    return JSON.parse(configStr);
+    const configStr = readFileSync('./config.json').toString()
+    console.log('Using config.json found in project folder')
+    return JSON.parse(configStr)
   } catch (e) {
-    const psTasksRoot = process.env['PSTASKS_ROOT'];
+    const psTasksRoot = process.env['PSTASKS_ROOT']
     if (!psTasksRoot) {
-      throw new Error('Unable to locate config. PSTASKS_ROOT env var not set.');
+      throw new Error('Unable to locate config. PSTASKS_ROOT env var not set.')
     } else {
-      const normalizedPath = normalize(psTasksRoot);
+      const normalizedPath = normalize(psTasksRoot)
       try {
-        const configStr = readFileSync(`${psTasksRoot}/config.json`)
-          .toString();
-        console.log(`using config.json in PSTASKS_ROOT: ${psTasksRoot}`);
-        return JSON.parse(configStr);
+        const configStr = readFileSync(`${normalizedPath}/config.json`)
+          .toString()
+        console.log(`using config.json in PSTASKS_ROOT: ${normalizedPath}`)
+        return JSON.parse(configStr)
       } catch (e) {
-        console.log(`error reading config.json found at ${psTasksRoot}`);
+        console.log(`error reading config.json found at ${normalizedPath}`)
       }
     }
-
   }
-  console.log('Could not load config.json -- all three loading methods failed');
-  return null;
+
+  console.log('Could not load config.json -- all three loading methods failed')
+  return null
 }
 
-/**
- * registers the following gulp tasks to the project-level (local) gulp
- * @param  {object} gulp default export
- * @param  {string} __dirname of the project folder that gulp command was executed from
- * @return {null}
- */
-export default function(gulp, projectPath) {
-  const config = loadConfig();
-  if (!options.env) {
-    options.env = config.default_deploy_target;
-  }
+// Required Functions
+const config = loadConfig()
+if (!options.env) {
+  options.env = config.default_deploy_target
+}
 
-  const plugins = gulpLoadPlugins();
+const plugins = gulpLoadPlugins()
 
-  if (!config.default_deploy_target && !knownOptions.env) {
-    throw new Error('No deploy target provided in cli options or the default_deploy_target config option');
-  }
+if (!config.default_deploy_target && !knownOptions.env) {
+  throw new Error('No deploy target provided in cli options or the default_deploy_target config option')
+}
 
-  // Required Functions
-  const deploy = lazypipe()
-    .pipe(() => {
-      const env = options.env;
-      return plugins.if(config.hasOwnProperty(env), plugins.sftp(config[env].deploy_credentials))
-    });
+const deploy = lazypipe()
+  .pipe(() => {
+    const env = options.env
+    return plugins.if(config.hasOwnProperty(env), plugins.sftp(config[env].deploy_credentials))
+  })
 
-  const preprocess = lazypipe()
-    .pipe(() => {
-      const env = options.env;
-      const context = {
-        context: {}
-      };
-      if (config[env].ps_url) {
-        context.context.PS_URL = config[env].ps_url;
-      }
-      return plugins.if(config.hasOwnProperty(env), plugins.preprocess(context));
-    });
+const preprocess = lazypipe()
+  .pipe(() => {
+    const env = options.env
+    const context = {
+      context: {}
+    };
+    if (config[env].ps_url) {
+      context.context.PS_URL = config[env].ps_url
+    }
+    return plugins.if(config.hasOwnProperty(env), plugins.preprocess(context))
+  })
 
-  // Utility tasks
-  export const clean = () => del(['dist/*', '!dist/*.zip'])
-  
-  export const zip = () => gulp
-    .src('dist/plugin/**')
-    .pipe(plugins.zip('plugin.zip'))
-    .pipe(gulp.dest('dist'))
-  
-  // Plugin generation tasks
-  export const buildPlugin = () => gulp
-    .src(['plugin/**', 'plugin.xml'])
-    .pipe(gulp.dest('dist'))
+// Utility tasks
+export const clean = () => del(['dist/*', '!dist/*.zip'])
 
-  export const buildSrc = () => gulp
-    .src('src/**')
-    .pipe(gulp.dest('dist/web_root'))
+export const zip = () => gulp
+  .src('dist/plugin/**')
+  .pipe(plugins.zip('plugin.zip'))
+  .pipe(gulp.dest('dist'))
 
-  // Build Tasks
-  export const buildBabel = () => gulp
-    .src([
-      './src/**/*.js',
-      '!src/**/ext/**'
-    ], {
-      base: './'
-    })
-    .pipe(preprocess())
-    .pipe(plugins.babel({
-      plugins: [
-        'transform-es2015-modules-amd',
-        'transform-es2015-classes'
-      ]
-    }))
-    .pipe(gulp.dest('dist'))
-  
-  export const buildPreprocess = () => gulp
-    .src([
-      './plugin/**/*',
-      './src/**/*',
-      './queries_root/**/*',
-      'plugin/plugin.xml',
-      '!src/**/*.less',
-      '!src/**/.*scss',
-      '!src/**/*.{png,gif,jpg,bmp,swf,js}',
-      '!src/**/ext/**',
-      '!src/**/less{,/**}',
-      '!src/**/sass{,/**}',
-      '!plugin/web_root/admin/**/*.js',
-      '!plugin/WEB_ROOT/admin/**/*.js'
-    ], {
-      base: './'
-    })
-    .pipe(preprocess())
-    .pipe(gulp.dest('dist'))
+// Plugin generation tasks
+export const buildPlugin = () => gulp
+  .src(['plugin/**', 'plugin.xml'])
+  .pipe(gulp.dest('dist'))
 
-  export const buildStatic = () => gulp
-    .src([
-      './src/**/*.{jpg,png,gif,bmp,swf}',
-      './src/**/ext/**',
+export const buildSrc = () => gulp
+  .src('src/**')
+  .pipe(gulp.dest('dist/web_root'))
 
-      //treat all js files within /admin as a static resource
-      './plugin/web_root/admin/**/*.js'  
-    ], {
-      base: './'
-    })
-    .pipe(gulp.dest('dist/'))
-  
-  export const buildScss = () => gulp
-    .src([
-      '/**/*.scss',
-      '!src/**/ext/**'
-    ])
-    .pipe(plugins.sass().on('error', plugins.sass.logError))
-    .pipe(plugins.concatCss('css/bundle.css'))
-    .pipe(gulp.dest(`dist/src/scripts/${basename(dir.path)}`))
-  
-  // Tasks Runners
-  export const buildNoImage = done => {
-    return gulp.parallel(
-      'buildPlugin', 'buildSrc' 
-    )
-  }
+// Build Tasks
+export const buildBabel = () => gulp
+  .src([
+    './src/**/*.js',
+    '!src/**/ext/**'
+  ], {
+    base: './'
+  })
+  .pipe(preprocess())
+  .pipe(plugins.babel({
+    plugins: [
+      'transform-es2015-modules-amd',
+      'transform-es2015-classes'
+    ]
+  }))
+  .pipe(gulp.dest('dist'))
 
-  export const buildWithImage = done => {
-    return gulp.parallel(
-      'buildBabel', 'buildPreprocess', 'buildSass', 'buildStatic', 
-    )
-  }
+export const buildPreprocess = () => gulp
+  .src([
+    './plugin/**/*',
+    './src/**/*',
+    './queries_root/**/*',
+    'plugin/plugin.xml',
+    '!src/**/*.less',
+    '!src/**/.*scss',
+    '!src/**/*.{png,gif,jpg,bmp,swf,js}',
+    '!src/**/ext/**',
+    '!src/**/less{,/**}',
+    '!src/**/sass{,/**}',
+    '!plugin/web_root/admin/**/*.js',
+    '!plugin/WEB_ROOT/admin/**/*.js'
+  ], {
+    base: './'
+  })
+  .pipe(preprocess())
+  .pipe(gulp.dest('dist'))
 
-  export const buildPackage = done => {
-    return gulp.series(
-      'zip', 'clean'
-    )
-  }
+export const buildStatic = () => gulp
+  .src([
+    './src/**/*.{jpg,png,gif,bmp,swf}',
+    './src/**/ext/**',
 
-  export const buildDeploy = () => gulp
-    .src('dist/src/**')
-    .pipe(deploy())
-  
-  export const buildWebpack = () => gulp
-    .pipe(webpackStream( require('./webpack.config.babel.js')))
-    .dist(gulp.dest('dist/'))
-  
-  // Orchestrators
-  export const createPkgNoImage = done => {
-    return gulp.series(
-      gulp.parallel(
-        'buildNoImage', 'buildWebpack'
-      ),
-      'buildPackage'
-    )
-  }
-  export const createPkgWithImage = done => {
-    return gulp.series(
-      gulp.parallel(
-        'buildWithImage', 'buildWebpack' 
-      ),
-      'buildDeploy', 'buildPackage' 
-    )
-  }
+    // treat all js files within /admin as a static resource
+    './plugin/web_root/admin/**/*.js'
+  ], {
+    base: './'
+  })
+  .pipe(gulp.dest('dist/'))
+
+export const buildScss = () => gulp
+  .src([
+    '/**/*.scss',
+    '!src/**/ext/**'
+  ])
+  .pipe(plugins.sass().on('error', plugins.sass.logError))
+  .pipe(plugins.concatCss('bundle.css'))
+  .pipe(gulp.dest(`dist/src/scripts/${module.exports.name}/css`))
+
+// Tasks Runners
+export const buildNoImage = done => {
+  return gulp.parallel(
+    'buildPlugin', 'buildSrc'
+  )
+}
+
+export const buildWithImage = done => {
+  return gulp.parallel(
+    'buildBabel', 'buildPreprocess', 'buildSass', 'buildStatic'
+  )
+}
+
+export const buildPackage = done => {
+  return gulp.series(
+    'zip', 'clean'
+  )
+}
+
+export const buildDeploy = () => gulp
+  .src('dist/src/**')
+  .pipe(deploy())
+
+export const buildWebpack = () => gulp
+  .pipe(webpackStream(require('./webpack.config.babel.js')))
+  .dist(gulp.dest('dist/'))
+
+// Orchestrators
+export const createPkgNoImage = done => {
+  return gulp.series(
+    gulp.parallel(
+      'buildNoImage', 'buildWebpack'
+    ),
+    'buildPackage'
+  )
+}
+export const createPkgWithImage = done => {
+  return gulp.series(
+    gulp.parallel(
+      'buildWithImage', 'buildWebpack'
+    ),
+    'buildDeploy', 'buildPackage'
+  )
 }
