@@ -75,49 +75,76 @@ export default function(gulp, projectPath) {
     throw new Error('No deploy target provided in cli options or the default_deploy_target config option');
   }
 
-  // No image server
-  gulp.task('build-plugin', () =>
-    gulp.src(['plugin/**', 'plugin.xml'])
-    .pipe(gulp.dest('dist'))
-  );
+  // Required Functions
+  const deploy = lazypipe()
+    .pipe(() => {
+      const env = options.env;
+      return plugins.if(config.hasOwnProperty(env), plugins.sftp(config[env].deploy_credentials))
+    });
 
-  gulp.task('build-src', ['build-plugin'], () =>
-    gulp.src('src/**')
-    .pipe(gulp.dest('dist/web_root'))
-  );
+  const preprocess = lazypipe()
+    .pipe(() => {
+      const env = options.env;
+      const context = {
+        context: {}
+      };
+      if (config[env].ps_url) {
+        context.context.PS_URL = config[env].ps_url;
+      }
+      return plugins.if(config.hasOwnProperty(env), plugins.preprocess(context));
+    });
 
-  gulp.task('zip', ['build-src'], () =>
-    gulp.src('dist')
-    .pipe(plugins.zip('plugin.zip'))
-    .pipe(gulp.dest('dist'))
-  );
+  // Utility tasks
+  export const clean = () => del(['dist/*', '!dist/*.zip'])
 
-  gulp.task('clean', () => {
-    del(['dist/*', '!dist/*.zip'])
-  });
-
-  gulp.task('build-no-img', ['build-plugin', 'build-src', 'zip', 'clean'])
-
-  gulp.task('deploy', () =>
-    gulp.src('dist/src/**')
+  export const deploy = () => gulp
+    .src('dist/src/**')
     .pipe(deploy())
-  );
-
-  gulp.task('watch-deploy', () =>
-    gulp.src('src/**')
+  
+  export const watchDeploy = () => gulp
+    .src('src/**')
     .pipe(plugins.watch('src/**'))
     .pipe(preprocess())
     .pipe(deploy())
-  );
 
-  gulp.task('package', () =>
-    gulp.src('dist/plugin/**')
+  export const zip = () => gulp
+    .src('dist')
     .pipe(plugins.zip('plugin.zip'))
     .pipe(gulp.dest('dist'))
-  );
+  
+  export const package = () => gulp
+    .src('dist/plugin/**')
+    .pipe(plugins.zip('plugin.zip'))
+    .pipe(gulp.dest('dist'))
 
-  gulp.task('build', ['build:less', 'build:sass', 'build:static', 'build:babel'], () =>
-    gulp.src([
+  // Plugin generation tasks
+  export const buildPlugin = () => gulp
+    .src(['plugin/**', 'plugin.xml'])
+    .pipe(gulp.dest('dist'))
+
+  export const buildSrc = () => gulp
+    .src('src/**')
+    .pipe(gulp.dest('dist/web_root'))
+
+  // Build Tasks
+  export const buildBabel = () => gulp
+    .src([
+      './src/**/*.js',
+      '!src/**/ext/**'
+    ], {
+      base: './'
+    })
+    .pipe(preprocess())
+    .pipe(plugins.babel({
+      plugins: [
+        'transform-es2015-modules-amd',
+        'transform-es2015-classes'
+      ]
+    }))
+    .pipe(gulp.dest('dist'))
+  
+  export const buildPreprocess = () => gulp
+    .src([
       './plugin/**/*',
       './src/**/*',
       './queries_root/**/*',
@@ -135,90 +162,38 @@ export default function(gulp, projectPath) {
     })
     .pipe(preprocess())
     .pipe(gulp.dest('dist'))
-  );
 
-  gulp.task('build:static', () =>
-    gulp.src([
+  export const buildStatic = () => gulp
+    .src([
       './src/**/*.{jpg,png,gif,bmp,swf}',
       './src/**/ext/**',
 
       //treat all js files within /admin as a static resource
-      './plugin/web_root/admin/**/*.js'
+      './plugin/web_root/admin/**/*.js'  
     ], {
       base: './'
     })
     .pipe(gulp.dest('dist/'))
-  );
-
-
-  gulp.task('build:babel', () =>
-    gulp.src([
-      './src/**/*.js',
-      '!src/**/ext/**'
-    ], {
-      base: './'
-    })
-    .pipe(preprocess())
-    .pipe(plugins.babel({
-      plugins: [
-        'transform-es2015-modules-amd',
-        'transform-es2015-classes'
-      ]
-    }))
-    .pipe(gulp.dest('dist'))
-  );
-
-  const deploy = lazypipe()
-    .pipe(() => {
-      const env = options.env;
-      return plugins.if(config.hasOwnProperty(env), plugins.sftp(config[env].deploy_credentials))
-    });
-
-  const preprocess = lazypipe()
-    .pipe(() => {
-      const env = options.env;
-      const context = {
-        context: {}
-      };
-      if (config[env].sams_url) {
-        context.context.SAMS_URL = config[env].sams_url;
-      }
-      if (config[env].api_url) {
-        context.context.API_URL = config[env].api_url;
-      }
-      if (config[env].ps_url) {
-        context.context.PS_URL = config[env].ps_url;
-      }
-      return plugins.if(config.hasOwnProperty(env), plugins.preprocess(context));
-    });
-
-  gulp.task('build:lint', () =>
-    gulp.src('src/**/*.js')
-    .pipe(plugins.eslint())
-    .pipe(plugins.eslint.format())
-  );
-
-  gulp.task('build:less', () =>
-    gulp.src([
-      'src/**/*.less',
-      '!src/**/ext/**',
-      '!src/**/less/**'
-    ])
-    .pipe(plugins.less())
-    .pipe(preprocess())
-    .pipe(gulp.dest('dist/src'))
-  );
-
-  gulp.task('build:sass', () =>
-    gulp.src([
-      'src/scripts/*',
+  
+  export const buildScss = () => gulp
+    .src([
+      '/**/*.scss',
       '!src/**/ext/**'
     ])
-    .pipe(plugins.flatmap((stream, dir) =>
-      gulp.src(dir.path + '/**/*.scss')
-        .pipe(plugins.sass().on('error', plugins.sass.logError))
-        .pipe(plugins.concatCss('css/bundle.css'))
-        .pipe(gulp.dest('dist/src/scripts/' + basename(dir.path)))
-    ))
-  );
+    .pipe(plugins.sass().on('error', plugins.sass.logError))
+    .pipe(plugins.concatCss('css/bundle.css'))
+    .pipe(gulp.dest(`dist/src/scripts/${basename(dir.path)}`))
+  
+  // Build Tasks Runners
+  export const buildNoImage = done => {
+    return gulp.parallel(
+      'buildPlugin', 'buildSrc', 'zip', 'clean', 
+    )(done)
+  }
+
+  export const buildWithImage = done => {
+    return gulp.parallel(
+      'buildBabel', 'buildPreprocess', 'buildSass', 'buildStatic', 
+    )(done)
+  } 
 }

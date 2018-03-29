@@ -1,7 +1,5 @@
 {
   "image_server_name": {
-    "sams_url": "",
-    "api_url": "",
     "ps_url": "",
     "deploy_credentials": {
       "host": "",
@@ -12,8 +10,6 @@
   },
 
   "image_server_name2": {
-    "sams_url": "https://sams.example.com",
-    "api_url": "https://api.example.com",
     "ps_url": "https://ps.example.com",
     "deploy_credentials": {
       "host": "sftp_host",
