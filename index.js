@@ -96,27 +96,12 @@ export default function(gulp, projectPath) {
 
   // Utility tasks
   export const clean = () => del(['dist/*', '!dist/*.zip'])
-
-  export const deploy = () => gulp
-    .src('dist/src/**')
-    .pipe(deploy())
   
-  export const watchDeploy = () => gulp
-    .src('src/**')
-    .pipe(plugins.watch('src/**'))
-    .pipe(preprocess())
-    .pipe(deploy())
-
   export const zip = () => gulp
-    .src('dist')
-    .pipe(plugins.zip('plugin.zip'))
-    .pipe(gulp.dest('dist'))
-  
-  export const package = () => gulp
     .src('dist/plugin/**')
     .pipe(plugins.zip('plugin.zip'))
     .pipe(gulp.dest('dist'))
-
+  
   // Plugin generation tasks
   export const buildPlugin = () => gulp
     .src(['plugin/**', 'plugin.xml'])
@@ -184,16 +169,38 @@ export default function(gulp, projectPath) {
     .pipe(plugins.concatCss('css/bundle.css'))
     .pipe(gulp.dest(`dist/src/scripts/${basename(dir.path)}`))
   
-  // Build Tasks Runners
+  // Tasks Runners
   export const buildNoImage = done => {
     return gulp.parallel(
-      'buildPlugin', 'buildSrc', 'zip', 'clean', 
-    )(done)
+      'buildPlugin', 'buildSrc' 
+    )
   }
 
   export const buildWithImage = done => {
     return gulp.parallel(
       'buildBabel', 'buildPreprocess', 'buildSass', 'buildStatic', 
-    )(done)
-  } 
+    )
+  }
+
+  export const buildPackage = done => {
+    return gulp.series(
+      'zip', 'clean'
+    )
+  }
+
+  export const buildDeploy = () => gulp
+    .src('dist/src/**')
+    .pipe(deploy())
+  
+  // Orchestrators
+  export const createPkgNoImage = done => {
+    return gulp.series(
+      'buildNoImage', 'buildPackage'
+    )
+  }
+  export const createPkgWithImage = done => {
+    return gulp.series(
+      'buildWithImage', 'buildPackage', 'buildDeploy'
+    )
+  }
 }
