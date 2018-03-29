@@ -1,30 +1,33 @@
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
-import runSequence from 'run-sequence';
 import del from 'del';
 
 const plugins = gulpLoadPlugins();
 
-gulp.task('build:copy', () =>
-  gulp.src([
-    'LICENSE',
-    'README.md',
-    'package.json',
-    '.config.example.json'
+// Utils Tasks
+export const clean = () => del(['dist/*'])
+
+// Build Tasks
+export const buildCopy = () => gulp
+  .src([
+      'LICENSE',
+      'README.md',
+      'package.json',
+      '.config.example.json'
   ])
   .pipe(gulp.dest('dist'))
-);
 
-gulp.task('build:babel', () =>
-  gulp.src('index.js')
+export const buildBabel = () => gulp
+  .src('index.js')
   .pipe(plugins.babel())
   .pipe(gulp.dest('dist'))
-);
 
-gulp.task('clean', () =>
-  del(['dist/*'])
-);
-
-gulp.task('build', (callback) =>
-  runSequence('clean', ['build:copy', 'build:babel'], callback)
-);
+// Orchestrators
+export const createPackage = done => {
+  return gulp.series(
+    'clean',
+    gulp.parallel(
+      'buildBabel', 'buildCopy'
+    )
+  )
+}
