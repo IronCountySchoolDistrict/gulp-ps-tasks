@@ -25,9 +25,9 @@ export const buildBabel = () => gulp
 // Orchestrators
 export const createPackage = done => {
   return gulp.series(
-    'clean',
+    clean,
     gulp.parallel(
-      'buildBabel', 'buildCopy'
+      buildBabel, buildCopy
     )
   )(done)
 }

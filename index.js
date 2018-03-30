@@ -98,32 +98,11 @@ export const zip = () => gulp
   .pipe(plugins.zip('plugin.zip'))
   .pipe(gulp.dest('dist'))
 
-// Plugin generation tasks
-export const buildPlugin = () => gulp
-  .src(['plugin/**', 'plugin.xml'])
-  .pipe(gulp.dest('dist'))
-
-export const buildSrc = () => gulp
-  .src('src/**')
-  .pipe(gulp.dest('dist/web_root'))
+export const deployImg = () => gulp
+  .src('dist/src/**')
+  .pipe(deploy())
 
 // Build Tasks
-export const buildBabel = () => gulp
-  .src([
-    './src/**/*.js',
-    '!src/**/ext/**'
-  ], {
-    base: './'
-  })
-  .pipe(preprocess())
-  .pipe(plugins.babel({
-    plugins: [
-      'transform-es2015-modules-amd',
-      'transform-es2015-classes'
-    ]
-  }))
-  .pipe(gulp.dest('dist'))
-
 export const buildPreprocess = () => gulp
   .src([
     './plugin/**/*',
@@ -144,68 +123,31 @@ export const buildPreprocess = () => gulp
   .pipe(preprocess())
   .pipe(gulp.dest('dist'))
 
-export const buildStatic = () => gulp
-  .src([
-    './src/**/*.{jpg,png,gif,bmp,swf}',
-    './src/**/ext/**',
-
-    // treat all js files within /admin as a static resource
-    './plugin/web_root/admin/**/*.js'
-  ], {
-    base: './'
-  })
-  .pipe(gulp.dest('dist/'))
-
-export const buildScss = () => gulp
-  .src([
-    '/**/*.scss',
-    '!src/**/ext/**'
-  ])
-  .pipe(plugins.sass().on('error', plugins.sass.logError))
-  .pipe(plugins.concatCss('bundle.css'))
-  .pipe(gulp.dest(`dist/src/scripts/${module.exports.name}/css`))
-
-// Tasks Runners
-export const buildNoImage = done => {
-  return gulp.parallel(
-    'buildPlugin', 'buildSrc'
-  )
-}
-
-export const buildWithImage = done => {
-  return gulp.parallel(
-    'buildBabel', 'buildPreprocess', 'buildSass', 'buildStatic'
-  )
-}
-
-export const buildPackage = done => {
-  return gulp.series(
-    'zip', 'clean'
-  )
-}
-
-export const buildDeploy = () => gulp
-  .src('dist/src/**')
-  .pipe(deploy())
-
 export const buildWebpack = () => gulp
   .pipe(webpackStream(require('./webpack.config.babel.js')))
   .dist(gulp.dest('dist/'))
 
+// Tasks Runners
+export const runPackage = done => {
+  return gulp.series(
+    zip, clean
+  )(done)
+}
+
+export const runBuildTasks = done => {
+  return gulp.parallel(
+    buildPreprocess, buildWebpack
+  )(done)
+}
+
 // Orchestrators
 export const createPkgNoImage = done => {
   return gulp.series(
-    gulp.parallel(
-      'buildNoImage', 'buildWebpack'
-    ),
-    'buildPackage'
-  )
+    runBuildTasks, runPackage
+  )(done)
 }
 export const createPkgWithImage = done => {
   return gulp.series(
-    gulp.parallel(
-      'buildWithImage', 'buildWebpack'
-    ),
-    'buildDeploy', 'buildPackage'
-  )
+    runBuildTasks, deployImg, runPackage
+  )(done)
 }
