@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/zombiesix/.nvm/versions/node/v9.9.0/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js add pkjinfo
+  /Users/zombiesix/.nvm/versions/node/v9.9.0/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js add .
 
 PATH: 
   /opt/local/bin:/opt/local/sbin:/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/opt/coreutils/libexec/gnubin:/Users/zombiesix/.nvm/versions/node/v9.9.0/bin:/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/local/bin
@@ -53,6 +53,7 @@ npm manifest:
       "lazypipe": "^1.0.1",
       "minimist": "^1.2.0",
       "normalize-path": "^2.1.1",
+      "pkginfo": "^0.4.1",
       "run-sequence": "^2.2.1",
       "webpack-stream": "^4.0.3"
     },
@@ -4308,6 +4309,10 @@ Lockfile:
     dependencies:
       find-up "^1.0.0"
   
+  pkginfo@^0.4.1:
+    version "0.4.1"
+    resolved "https://registry.yarnpkg.com/pkginfo/-/pkginfo-0.4.1.tgz#b5418ef0439de5425fc4995042dced14fb2a84ff"
+  
   plugin-error@^0.1.2:
     version "0.1.2"
     resolved "https://registry.yarnpkg.com/plugin-error/-/plugin-error-0.1.2.tgz#3b9bb3335ccf00f425e07437e19276967da47ace"
@@ -5940,11 +5945,14 @@ Lockfile:
       buffer-crc32 "~0.2.3"
 
 Trace: 
-  Error: Couldn't find package "pkjinfo" on the "npm" registry.
+  Error: Received malformed response from registry for undefined. The registry may be down.
       at new MessageError (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:186:110)
-      at NpmResolver.<anonymous> (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:51625:15)
+      at Function.<anonymous> (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:51419:15)
       at Generator.next (<anonymous>)
       at step (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:98:30)
-      at /usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:109:13
-      at <anonymous>
-      at process._tickCallback (internal/process/next_tick.js:118:7)
+      at /usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:116:14
+      at new Promise (<anonymous>)
+      at new F (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:23451:28)
+      at Function.<anonymous> (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:95:12)
+      at Function.findVersionInRegistryResponse (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:51461:19)
+      at NpmResolver.<anonymous> (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:51479:28)
