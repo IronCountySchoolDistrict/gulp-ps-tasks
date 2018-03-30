@@ -1,4 +1,5 @@
 import gulp from 'gulp'
+import webpack from 'webpack'
 import gulpLoadPlugins from 'gulp-load-plugins'
 import minimist from 'minimist'
 import del from 'del'
@@ -94,46 +95,37 @@ const preprocess = lazypipe()
 export const clean = () => del(['dist/*', '!dist/*.zip'])
 
 export const zip = () => gulp
-  .src('dist/plugin/**')
+  .src([
+    'dist/**',
+    '!dist/**/*.zip',
+    '!dist/build/'
+  ])
   .pipe(plugins.zip('plugin.zip'))
-  .pipe(gulp.dest('dist'))
+  .pipe(gulp.dest('dist/build/'))
 
 export const deployImg = () => gulp
-  .src('dist/src/**')
+  .src([
+    'dist/web_root/scripts/**',
+    'dist/web_root/images/**'
+  ])
   .pipe(deploy())
 
 // Build Tasks
 export const buildPreprocess = () => gulp
   .src([
     './plugin/**/*',
-    './src/**/*',
     './queries_root/**/*',
-    'plugin/plugin.xml',
-    '!src/**/*.less',
-    '!src/**/.*scss',
-    '!src/**/*.{png,gif,jpg,bmp,swf,js}',
-    '!src/**/ext/**',
-    '!src/**/less{,/**}',
-    '!src/**/sass{,/**}',
-    '!plugin/web_root/admin/**/*.js',
-    '!plugin/WEB_ROOT/admin/**/*.js'
-  ], {
-    base: './'
-  })
+    'plugin/plugin.xml'
+  ])
   .pipe(preprocess())
   .pipe(gulp.dest('dist'))
 
-export const buildWebpack = () => gulp
-  .pipe(webpackStream(require('./webpack.config.babel.js')))
-  .dist(gulp.dest('dist/'))
-
-// Tasks Runners
-export const runPackage = done => {
-  return gulp.series(
-    zip, clean
-  )(done)
+export const buildWebpack = () => {
+  return webpackStream(require(`${process.cwd()}/webpack.config.babel.js`), webpack)
+    .pipe(gulp.dest('dist'))
 }
 
+// Tasks Runners
 export const runBuildTasks = done => {
   return gulp.parallel(
     buildPreprocess, buildWebpack
@@ -143,11 +135,11 @@ export const runBuildTasks = done => {
 // Orchestrators
 export const createPkgNoImage = done => {
   return gulp.series(
-    runBuildTasks, runPackage
+    clean, runBuildTasks, zip
   )(done)
 }
 export const createPkgWithImage = done => {
   return gulp.series(
-    runBuildTasks, deployImg, runPackage
+    clean, runBuildTasks, deployImg, zip
   )(done)
 }
